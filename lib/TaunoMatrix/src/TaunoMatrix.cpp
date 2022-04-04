@@ -1,9 +1,10 @@
 /*
- *  File: TaunoMatrix.cpp
- *  Started: 03.04.2022
- *  Edited:  03.04.2022
- *  Copyright 2022 Tauno Erik
- *  https://taunoerik.art/
+ * File: TaunoMatrix.cpp
+ * Started: 03.04.2022
+ * Edited:  04.04.2022
+ * Copyright 2022 Tauno Erik
+ * https://taunoerik.art/
+ * https://github.com/taunoe/sadakond
  */
 
 #include "TaunoMatrix.h"
@@ -169,6 +170,14 @@ void TaunoMatrix::set_low(uint8_t column, uint8_t row) {
   }
 }
 
+void TaunoMatrix::set(uint8_t column, uint8_t row, uint8_t status) {
+  if (status > 0) {
+    set_high(column, row);
+  } else {
+    set_low(column, row);
+  }
+}
+
 
 void TaunoMatrix::send_out() {
   digitalWrite(_latch_pin, LOW);
@@ -199,4 +208,29 @@ void TaunoMatrix::print_output() {
     Serial.print(output[i], BIN);
     Serial.print("\n");
   }
+}
+
+/*
+ array size = 10
+*/
+void TaunoMatrix::display_frame(uint16_t array[]) {
+  // Tagurpidi 9 -> 0
+  // Iga massiivi element sisaldab 10-bittist numbrit
+  for (uint8_t row = 10; row > 0; row--){
+    Serial.print(row-1);
+    Serial.print("-");
+    Serial.println(array[row-1], BIN);
+    delay(300);
+    // Lugeda elemendi bittide väärtused eraldi
+    // ja teisendada output massiivi
+    uint16_t lugeja = 0b1000000000;
+    for (size_t column = 0; column < 10; column++) {
+      uint8_t lugem =  array[row-1] & lugeja;
+
+      lugeja = lugeja >> 1;  // Loeme vasakult paremale
+      
+      set(column, row, lugem);
+    }
+  }
+  send_out();
 }

@@ -1,10 +1,12 @@
 /*
- *  File: TaunoMatrix.h
- *  Started: 03.04.2022
- *  Edited:  03.04.2022
- *  Copyright 2022 Tauno Erik
- *  https://taunoerik.art/
+ * File: TaunoMatrix.h
+ * Started: 03.04.2022
+ * Edited:  04.04.2022
+ * Copyright 2022 Tauno Erik
+ * https://taunoerik.art/
+ * https://github.com/taunoe/sadakond
  */
+
 #include <Arduino.h>
 
 #if !defined(LIB_TAUNOMATRIX_H)
@@ -53,11 +55,17 @@ class TaunoMatrix {
   TaunoMatrix(uint8_t latch_pin,uint8_t clock_pin, uint8_t data_pin);
   ~TaunoMatrix();
   void begin();
-  void set_high(uint8_t column, uint8_t row);
-  void set_low(uint8_t column, uint8_t row);
-  void send_out();
-  void print_output();
+  void set_high(uint8_t column, uint8_t row);  // Individual LED HIGH.
+  void set_low(uint8_t column, uint8_t row);   // Individual LED LOW.
+  void set(uint8_t column, uint8_t row, uint8_t status);  // Individual LED HIGH or LOW
+  void send_out();       // Displays data array.
+  void print_output();   // Serial.print data.
 
+  /*
+   * Displays matrix dada.
+   * Input is 16-bit array[10] (8-bit is too small to hold 10 places!)
+   */
+  void display_frame(uint16_t array[]);
 };
 
 #endif // LIB_TAUNOMATRIX_H
