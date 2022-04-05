@@ -7,7 +7,7 @@
  * Author:  Tauno Erik https://taunoerik.art/
  * Github:  https://github.com/taunoe/sadakond
  * Started: 27.03.2022
- * Edited:  04.04.2022
+ * Edited:  05.04.2022
  **/
 
 #include <Arduino.h>
@@ -25,15 +25,15 @@ TaunoMatrix Matrix(LATCH_PIN, CLOCK_PIN, DATA_PIN);
 int del_time = 1;
 
 uint16_t frame1[10] = {
-  0b1000000001,  // 0
-  0b1000000001,  // 1
-  0b1000000001,  // 2
-  0b1000000001,  // 3
-  0b1000000001,  // 4
-  0b1000000001,  // 5
-  0b1000000001,  // 6
-  0b1000000001,  // 7
-  0b1000000001,  // 8
+  0b1000000010,  // 0
+  0b1100000000,  // 1
+  0b1010000000,  // 2
+  0b1001000000,  // 3
+  0b1000100000,  // 4
+  0b1000010000,  // 5
+  0b1000001000,  // 6
+  0b1000000100,  // 7
+  0b1000000010,  // 8
   0b1000000001,  // 9
 };
 
@@ -58,7 +58,7 @@ void loop() {
   /*
   Displays: \
   */
-  uint8_t max = 10;
+ /* uint8_t max = 10;
 
   for (uint8_t i = 0; i < max; i++){
     if (i!=0) {
@@ -69,11 +69,11 @@ void loop() {
     delay(del_time);
     Matrix.set_low(i+1, i+1);
   }
-
+*/
   /*
   Display frame
   */
  Matrix.display_frame(frame1);
- delay(500);
+ delay(1000);
 
 }

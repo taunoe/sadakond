@@ -1,7 +1,7 @@
 /*
  * File: TaunoMatrix.cpp
  * Started: 03.04.2022
- * Edited:  04.04.2022
+ * Edited:  05.04.2022
  * Copyright 2022 Tauno Erik
  * https://taunoerik.art/
  * https://github.com/taunoe/sadakond
@@ -170,16 +170,36 @@ void TaunoMatrix::set_low(uint8_t column, uint8_t row) {
   }
 }
 
-void TaunoMatrix::set(uint8_t column, uint8_t row, uint8_t status) {
-  if (status > 0) {
+void TaunoMatrix::set(uint8_t column, uint8_t row, uint8_t value) {
+  Serial.print("set: ");
+  Serial.print("r=");
+  Serial.print(row);
+  Serial.print(" c=");
+  Serial.print(column);
+  Serial.print(" v=");
+  Serial.println(value);
+
+  if (value > 0) {
     set_high(column, row);
+    //Serial.println(" H");
   } else {
     set_low(column, row);
+    //Serial.println(" L");
   }
+
+  //print_output();
 }
 
+void TaunoMatrix::set_row_off(uint8_t row) {
+  Serial.println("Set row off");
+  for (size_t column = 0; column < 10; column++) {
+      set(column+1, row, 0);
+    }
+}
 
+// Send out all
 void TaunoMatrix::send_out() {
+  Serial.println("Send out");
   digitalWrite(_latch_pin, LOW);
 
   for (uint8_t i = 0; i < 3; i++) {
@@ -189,20 +209,10 @@ void TaunoMatrix::send_out() {
   digitalWrite(_latch_pin, HIGH);
 }
 
+
 void TaunoMatrix::print_output() {
   for (uint8_t i = 0; i < 3; i++) {
-    Serial.print("_latch_pin: ");
-    Serial.print(_latch_pin);
-    Serial.print("\n");
-
-    Serial.print("_clock_pin: ");
-    Serial.print(_clock_pin);
-    Serial.print("\n");
-
-    Serial.print("_data_pin: ");
-    Serial.print(_data_pin);
-    Serial.print("\n");
-
+    // Raw
     Serial.print(i);
     Serial.print("=");
     Serial.print(output[i], BIN);
@@ -214,23 +224,40 @@ void TaunoMatrix::print_output() {
  array size = 10
 */
 void TaunoMatrix::display_frame(uint16_t array[]) {
-  // Tagurpidi 9 -> 0
+  // Tagurpidi 9 -> 0 ??
   // Iga massiivi element sisaldab 10-bittist numbrit
-  for (uint8_t row = 10; row > 0; row--){
-    Serial.print(row-1);
-    Serial.print("-");
-    Serial.println(array[row-1], BIN);
-    delay(300);
-    // Lugeda elemendi bittide väärtused eraldi
-    // ja teisendada output massiivi
-    uint16_t lugeja = 0b1000000000;
-    for (size_t column = 0; column < 10; column++) {
-      uint8_t lugem =  array[row-1] & lugeja;
+  //for (uint8_t row = 10; row > 0; row--){
+  for (uint8_t row = 0; row < 10; row++){
 
-      lugeja = lugeja >> 1;  // Loeme vasakult paremale
-      
-      set(column, row, lugem);
+    //Serial.print(row);
+    //Serial.print(" ");
+    uint16_t read_column = 0b1000000000;
+
+    for (size_t column = 0; column < 10; column++) {
+      uint16_t column_value =  array[row] & read_column;
+      Serial.println(array[row], BIN);
+
+      if (column_value > 0) {
+        set(column+1, row+1, 1);
+        //Serial.print("x");
+        //Serial.print(row+1);
+        //delay(1);
+      } else {
+        set(column+1, row+1, 0);
+        //Serial.print("_");
+        //delay(1);
+      }
+
+      // Liigutame uut loetavat positsiooni
+      read_column = read_column >> 1;  // Loeme vasakult paremale
     }
+
+    Serial.print("\n");
+    send_out();        // Send out row
+    //print_output();    // Print out
+    delay(100);
+    set_row_off(row+1);  // Set to sero
+   
   }
-  send_out();
+  
 }

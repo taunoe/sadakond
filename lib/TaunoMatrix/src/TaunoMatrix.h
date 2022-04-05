@@ -1,7 +1,7 @@
 /*
  * File: TaunoMatrix.h
  * Started: 03.04.2022
- * Edited:  04.04.2022
+ * Edited:  05.04.2022
  * Copyright 2022 Tauno Erik
  * https://taunoerik.art/
  * https://github.com/taunoe/sadakond
@@ -51,14 +51,19 @@ class TaunoMatrix {
   const uint8_t  R9 = 0b00100000;  // 0
   const uint8_t R10 = 0b00010000;  // 0
 
+  //
+  const uint8_t high = 1;
+  const uint8_t low = 0;
+
   public:
   TaunoMatrix(uint8_t latch_pin,uint8_t clock_pin, uint8_t data_pin);
   ~TaunoMatrix();
   void begin();
   void set_high(uint8_t column, uint8_t row);  // Individual LED HIGH.
   void set_low(uint8_t column, uint8_t row);   // Individual LED LOW.
-  void set(uint8_t column, uint8_t row, uint8_t status);  // Individual LED HIGH or LOW
+  void set(uint8_t column, uint8_t row, uint8_t value);  // Individual LED HIGH or LOW
   void send_out();       // Displays data array.
+  void set_row_off(uint8_t row);
   void print_output();   // Serial.print data.
 
   /*
