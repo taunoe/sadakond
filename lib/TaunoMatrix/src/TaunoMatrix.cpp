@@ -1,7 +1,7 @@
 /*
  * File: TaunoMatrix.cpp
  * Started: 03.04.2022
- * Edited:  05.04.2022
+ * Edited:  06.04.2022
  * Copyright 2022 Tauno Erik
  * https://taunoerik.art/
  * https://github.com/taunoe/sadakond
@@ -23,9 +23,13 @@ TaunoMatrix::~TaunoMatrix() {
 }
 
 void TaunoMatrix::begin() {
-  pinMode(_latch_pin, OUTPUT);
-  pinMode(_clock_pin, OUTPUT);
-  pinMode(_data_pin, OUTPUT);
+  // Set pins as output
+  // PB4 latch pin
+  DDRB |= (1<<4);  //pinMode(_latch_pin, OUTPUT);
+  // PB3 clock pin
+  DDRB |= (1<<3);  //pinMode(_clock_pin, OUTPUT);
+  // PB2 data pin
+  DDRB |= (1<<2);  //pinMode(_data_pin, OUTPUT);
 }
 
 void TaunoMatrix::set_high(uint8_t column, uint8_t row) {
@@ -171,48 +175,41 @@ void TaunoMatrix::set_low(uint8_t column, uint8_t row) {
 }
 
 void TaunoMatrix::set(uint8_t column, uint8_t row, uint8_t value) {
-  Serial.print("set: ");
-  Serial.print("r=");
-  Serial.print(row);
-  Serial.print(" c=");
-  Serial.print(column);
-  Serial.print(" v=");
-  Serial.println(value);
-
   if (value > 0) {
     set_high(column, row);
-    //Serial.println(" H");
   } else {
     set_low(column, row);
-    //Serial.println(" L");
   }
-
-  //print_output();
 }
 
 void TaunoMatrix::set_row_off(uint8_t row) {
-  Serial.println("Set row off");
   for (size_t column = 0; column < 10; column++) {
-      set(column+1, row, 0);
-    }
+    set(column+1, row, 0);
+  }
 }
 
-// Send out all
+/*
+ * Send data to shift register
+ */
 void TaunoMatrix::send_out() {
-  Serial.println("Send out");
-  digitalWrite(_latch_pin, LOW);
+  //digitalWrite(_latch_pin, LOW);
+  PORTB &= ~(1<<4); // Set to HIGH
 
   for (uint8_t i = 0; i < 3; i++) {
     shiftOut(_data_pin, _clock_pin, LSBFIRST, output[i]);
+    // https://github.com/arduino/ArduinoCore-avr/blob/master/cores/arduino/wiring_shift.c
   }
 
-  digitalWrite(_latch_pin, HIGH);
+  //digitalWrite(_latch_pin, HIGH);
+  PORTB |= (1<<4); // Set to HIGH
 }
 
 
+/*
+ * Print raw data
+*/
 void TaunoMatrix::print_output() {
   for (uint8_t i = 0; i < 3; i++) {
-    // Raw
     Serial.print(i);
     Serial.print("=");
     Serial.print(output[i], BIN);
@@ -220,44 +217,27 @@ void TaunoMatrix::print_output() {
   }
 }
 
-/*
- array size = 10
-*/
 void TaunoMatrix::display_frame(uint16_t array[]) {
-  // Tagurpidi 9 -> 0 ??
   // Iga massiivi element sisaldab 10-bittist numbrit
-  //for (uint8_t row = 10; row > 0; row--){
-  for (uint8_t row = 0; row < 10; row++){
+  uint8_t size = 10;
 
-    //Serial.print(row);
-    //Serial.print(" ");
+  for (uint8_t row = 0; row < size; row++) {
     uint16_t read_column = 0b1000000000;
 
     for (size_t column = 0; column < 10; column++) {
       uint16_t column_value =  array[row] & read_column;
-      Serial.println(array[row], BIN);
 
       if (column_value > 0) {
         set(column+1, row+1, 1);
-        //Serial.print("x");
-        //Serial.print(row+1);
-        //delay(1);
       } else {
         set(column+1, row+1, 0);
-        //Serial.print("_");
-        //delay(1);
       }
 
-      // Liigutame uut loetavat positsiooni
-      read_column = read_column >> 1;  // Loeme vasakult paremale
-    }
+      send_out();
 
-    Serial.print("\n");
-    send_out();        // Send out row
-    //print_output();    // Print out
-    delay(100);
-    set_row_off(row+1);  // Set to sero
-   
+      // Liigutame uut loetavat positsiooni
+      read_column = read_column >> 1;
+    }
+    set_row_off(row+1);
   }
-  
 }
