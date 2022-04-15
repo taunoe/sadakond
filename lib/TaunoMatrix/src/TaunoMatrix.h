@@ -1,7 +1,7 @@
 /*
  * File: TaunoMatrix.h
  * Started: 03.04.2022
- * Edited:  05.04.2022
+ * Edited:  13.04.2022
  * Copyright 2022 Tauno Erik
  * https://taunoerik.art/
  * https://github.com/taunoe/sadakond
@@ -58,12 +58,22 @@ class TaunoMatrix {
   public:
   TaunoMatrix(uint8_t latch_pin,uint8_t clock_pin, uint8_t data_pin);
   ~TaunoMatrix();
+  // Sets pin modes
   void begin();
-  void set_high(uint8_t column, uint8_t row);  // Individual LED HIGH.
-  void set_low(uint8_t column, uint8_t row);   // Individual LED LOW.
-  void set(uint8_t column, uint8_t row, uint8_t value);  // Individual LED HIGH or LOW
-  void send_out();       // Displays data array.
+  // Set one LED high
+  void set_high(uint8_t column, uint8_t row);
+  // Set one LED low
+  void set_low(uint8_t column, uint8_t row);
+  // Set on LED low or high
+  void set(uint8_t column, uint8_t row, uint8_t value);
+  // 
+  void shift_out(uint8_t dataPin, uint8_t clockPin, uint8_t bitOrder, uint8_t val);
+  // Send all data out to shift registers
+  void send_out();
+  // Turn all LEDs on row off
   void set_row_off(uint8_t row);
+  //
+  void change_row(uint8_t row, uint16_t values);
   void print_output();   // Serial.print data.
 
   /*
